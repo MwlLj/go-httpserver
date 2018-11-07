@@ -25,9 +25,6 @@ func (*urlParse) findMatch(topic *string, subscribes *sync.Map, param *urlParam)
 			return true
 		}
 		for i, t := range topics {
-			if t == "" {
-				continue
-			}
 			exp, err := regexp.Compile(":(.*)?")
 			if err != nil {
 				continue
