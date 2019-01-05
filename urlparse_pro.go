@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"sync"
@@ -39,7 +40,7 @@ func (this *urlParsePro) regisnterUrl(topic string) error {
 	matchUrlStr := string(matchUrl)
 	_, ok := this.m_topicMap.Load(matchUrlStr)
 	if ok {
-		panic("exist register")
+		return errors.New("exist register")
 	}
 	info := subscribeInfo{
 		singleFields: fieldList,
