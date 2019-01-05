@@ -1,8 +1,8 @@
 package main
 
 import (
+	".."
 	"fmt"
-	"github.com/MwlLj/go-httpserver"
 	"io"
 	"net/http"
 	"strings"
@@ -16,17 +16,21 @@ func HandleIndex(w http.ResponseWriter, r *http.Request, param httpserver.CUrlPa
 }
 
 func HandleHello(w http.ResponseWriter, r *http.Request, param httpserver.CUrlParam, server httpserver.CHttpServer, userdata interface{}) bool {
-	io.WriteString(w, strings.Join([]string{"hello", *param.ByName("name")}, ":"))
+	io.WriteString(w, strings.Join([]string{"hello name"}, ":"))
 	return true
 }
 
 func HandleHello2(w http.ResponseWriter, r *http.Request, param httpserver.CUrlParam, server httpserver.CHttpServer, userdata interface{}) bool {
-	io.WriteString(w, strings.Join([]string{"hello", *param.ByName("name"), "age", *param.ByName("age")}, ":"))
+	io.WriteString(w, strings.Join([]string{"hello", *param.ByName("name"), ", age", *param.ByName("age")}, ":"))
 	return true
 }
 
 func HandleError(w http.ResponseWriter, r *http.Request, param httpserver.CUrlParam, server httpserver.CHttpServer, userdata interface{}) bool {
 	return false
+}
+
+func HandlePound(w http.ResponseWriter, r *http.Request, param httpserver.CUrlParam, server httpserver.CHttpServer, userdata interface{}) bool {
+	return true
 }
 
 type CServer struct {
@@ -43,8 +47,9 @@ func (this *CServer) Start() {
 	// resubscribe
 	this.m_http.Subscribe("/", httpserver.GET, httpserver.NewRouterHandler(this, HandleIndex))
 	this.m_http.Subscribe("/error", httpserver.GET, httpserver.NewRouterHandler(this, HandleError))
-	this.m_http.Subscribe("/hello/:name", httpserver.GET, httpserver.NewRouterHandler(this, HandleHello))
+	this.m_http.Subscribe("/hello/name", httpserver.GET, httpserver.NewRouterHandler(this, HandleHello))
 	this.m_http.Subscribe("/hello/name/:name/age/:age", httpserver.GET, httpserver.NewRouterHandler(this, HandleHello2))
+	this.m_http.Subscribe("/pound/:name/#", httpserver.GET, httpserver.NewRouterHandler(this, HandlePound))
 	http.ListenAndServe(":59000", this.m_http)
 }
 

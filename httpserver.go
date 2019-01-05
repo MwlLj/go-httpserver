@@ -31,7 +31,7 @@ type CRouterHandler interface {
 }
 
 func NewHttpServer() CHttpServer {
-	return &httpServer{}
+	return &httpServerImpl{}
 }
 
 func NewRouterHandler(userdata interface{}, handle HandleFunc) CRouterHandler {
