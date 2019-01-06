@@ -45,7 +45,14 @@ func (this *httpServerImpl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (this *httpServerImpl) Subscribe(topic string, method string, handler CRouterHandler) {
 	this.m_urlParse.regisnterUrl(topic)
-	methodMap := sync.Map{}
-	methodMap.Store(method, handler)
-	this.m_topicMap.Store(topic, methodMap)
+	v, ok := this.m_topicMap.Load(topic)
+	if !ok {
+		methodMap := sync.Map{}
+		methodMap.Store(method, handler)
+		this.m_topicMap.Store(topic, methodMap)
+	} else {
+		mp := v.(sync.Map)
+		mp.Store(method, handler)
+		this.m_topicMap.Store(topic, mp)
+	}
 }
