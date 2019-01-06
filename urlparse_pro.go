@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -20,31 +21,39 @@ type subscribeInfo struct {
 }
 
 func (this *urlParsePro) regisnterUrl(topic string) error {
-	match, err := regexp.Compile(":([^/]*)?")
+	singleMatch, err := regexp.Compile(":([^/]*)?")
 	if err != nil {
-		panic("")
+		return err
 	}
-	fields := match.FindAllStringSubmatch(topic, -1)
+	fields := singleMatch.FindAllStringSubmatch(topic, -1)
 	var fieldList []string
 	for _, field := range fields {
 		if len(field) > 1 {
 			fieldList = append(fieldList, field[1])
 		}
 	}
-	str := match.ReplaceAll([]byte(topic), []byte("([^/]*)?"))
-	match, err = regexp.Compile("#")
+	str := singleMatch.ReplaceAll([]byte(topic), []byte("([^/]*)?"))
+	match, err := regexp.Compile("#")
 	if err != nil {
-		panic("")
+		return err
 	}
 	matchUrl := match.ReplaceAll(str, []byte("(.*)?"))
 	matchUrlStr := string(matchUrl)
+	isExistPound := match.Match(str)
+	///////
+	ts := strings.Split(topic, "/")
+	tsLast := ts[len(ts)-1]
+	if singleMatch.Match([]byte(tsLast)) && !isExistPound {
+		matchUrlStr += "$"
+	}
+	///////
 	_, ok := this.m_topicMap.Load(matchUrlStr)
 	if ok {
 		return errors.New("exist register")
 	}
 	info := subscribeInfo{
 		singleFields: fieldList,
-		isExistPound: match.Match(str),
+		isExistPound: isExistPound,
 		matchUrl:     matchUrlStr,
 	}
 	this.m_topicMap.Store(topic, info)
